@@ -1,4 +1,4 @@
-﻿import os
+import os
 import re
 import sqlite3
 import threading
@@ -8,12 +8,13 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 
 # ============================================================
 # TRADE SESSION — сервер проверки UID
-# Читает Telegram-канал, собирает UID, отдаёт их сайту
 # ============================================================
 
-# ============ НАСТРОЙКИ (берутся из переменных окружения) ============
-BOT_TOKEN  = os.environ.get("BOT_TOKEN")     # токен от BotFather
-CHANNEL_ID = os.environ.get("CHANNEL_ID")    # ID твоего канала (-100...)
+# ============ НАСТРОЙКИ ============
+# Токен и ID канала уже вписаны ниже.
+# Если захочешь поменять — просто отредактируй эти строки.
+BOT_TOKEN  = os.environ.get("BOT_TOKEN")  or "8637818965:AAGnE9fegjAmZZbiTrJNXsjtitL089qxjT4"
+CHANNEL_ID = os.environ.get("CHANNEL_ID") or "-1003589899000"
 DB_PATH    = "data.db"
 
 # ============================================================
@@ -86,7 +87,7 @@ def check_uid():
         return jsonify({"ok": False, "error": "uid required"}), 400
     return jsonify({"ok": uid_exists(uid), "uid": uid})
 
-# Только для отладки: посмотреть, сколько всего UID в базе
+# Отладка: сколько всего UID в базе
 @flask_app.route("/stats")
 def stats():
     conn = sqlite3.connect(DB_PATH)
@@ -101,7 +102,6 @@ def stats():
 # ============================================================
 if __name__ == "__main__":
     init_db()
-    # Бот в отдельном потоке, чтобы Flask не блокировался
     threading.Thread(target=run_bot, daemon=True).start()
     port = int(os.environ.get("PORT", 5000))
     flask_app.run(host="0.0.0.0", port=port)
